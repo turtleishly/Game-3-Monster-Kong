@@ -41,30 +41,81 @@ var GameState = {
         this.player.anchor.setTo(0.5);
         this.player.animations.add('walking',[0,1,2,1],6,true);
         this.game.physics.enable(this.player);
+        this.player.customParams = {};
 
-
+        this.createOnScreenControls();
     },
     update: function(){
-        this.game.physics.arcade.collide(this.player,this.ground,this.landed);
-        this.game.physics.arcade.collide(this.player,this.platform,this.landed);
+        this.game.physics.arcade.collide(this.player,this.ground);
+        this.game.physics.arcade.collide(this.player,this.platform);
 
         this.player.body.velocity.x = 0;
 
-        if(this.cursors.left.isDown){
+        if(this.cursors.left.isDown ||this.player.customParams.isMovingLeft){
             this.player.body.velocity.x = -this.RUNNING_SPEED;
         }
-        else if(this.cursors.right.isDown){
+        else if(this.cursors.right.isDown || this.player.customParams.isMovingRight){
             this.player.body.velocity.x = this.RUNNING_SPEED;
         }
 
-        if(this.cursors.up.isDown && this.player.body.touching.down){
+        if((this.cursors.up.isDown ||this.player.customParams.mustJump) && this.player.body.touching.down){
             this.player.body.velocity.y = -this.JUMPING_SPEED;
+
         }
 
 
     },
-    landed : function(player,ground){
+    createOnScreenControls : function(){
+
+        this.leftArrow = this.add.button(20,535,'arrowButton');
+        this.rightArrow = this.add.button(110,535,'arrowButton');
+        this.actionButton = this.add.button(280,535,'actionButton');
+
+        this.rightArrow.alpha = 0.5;
+        this.leftArrow.alpha = 0.5;
+        this.actionButton.alpha = 0.5;
+
+        this.actionButton.events.onInputDown.add(function(){
+            this.player.customParams.mustJump = true;
+        },this);
+        this.actionButton.events.onInputUp.add(function(){
+            this.player.customParams.mustJump = false;
+        },this)
+
+        //left
+
+        this.leftArrow.events.onInputDown.add(function(){
+            this.player.customParams.isMovingLeft = true;
+        },this);
+        this.leftArrow.events.onInputUp.add(function(){
+            this.player.customParams.isMovingLeft = false;
+        },this)
+
+        this.leftArrow.events.onInputOver.add(function(){
+            this.player.customParams.isMovingLeft = true;
+        },this);
+        this.leftArrow.events.onInputOut.add(function(){
+            this.player.customParams.isMovingLeft = false;
+        },this)
+
+        //right
+
+        this.rightArrow.events.onInputDown.add(function(){
+            this.player.customParams.isMovingRight = true;
+        },this);
+        this.rightArrow.events.onInputUp.add(function(){
+            this.player.customParams.isMovingRight = false;
+        },this)
+
+        this.rightArrow.events.onInputOver.add(function(){
+            this.player.customParams.isMovingRight = true;
+        },this);
+        this.rightArrow.events.onInputOut.add(function(){
+            this.player.customParams.isMovingRight = false;
+        },this)
+
     },
+   
 };
 
 var game = new Phaser.Game(360,592,Phaser.AUTO);
